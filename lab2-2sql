@@ -1,0 +1,51 @@
+--CREATE SEQUENCE seq_increment_identity START WITH 1 INCREMENT BY 1 NOCACHE
+--NOCYCLE;
+
+--CREATE OR REPLACE TRIGGER AutoIncrement_Group_ID
+--BEFORE INSERT ON GROUPS
+--FOR EACH ROW
+--declare
+--    name_count number := 0;
+--BEGIN
+--    SELECT seq_increment_identity.NEXTVAL INTO :NEW.Group_ID FROM dual;
+--
+--    SELECT COUNT(*) INTO name_count FROM GROUPS WHERE GROUPS.Name = :NEW.Name;
+--    
+--    IF name_count > 0 THEN
+--        raise_application_error(-20001,'Name must be unique');
+--    END IF;
+--END;
+
+--CREATE SEQUENCE seq_increment_identity_for_students START WITH 1 INCREMENT BY 1 NOCACHE
+--NOCYCLE;
+--
+--CREATE OR REPLACE TRIGGER AutoIncrement_Student_ID
+--BEFORE INSERT ON STUDENTS
+--FOR EACH ROW
+--DECLARE
+--    name_count number := 0;
+--BEGIN
+--
+--    SELECT seq_increment_identity_for_students.NEXTVAL INTO :NEW.Student_ID FROM dual;
+--    
+--    SELECT COUNT(*) INTO name_count FROM STUDENTS WHERE STUDENTS.Name = :NEW.Name;
+--    
+--    IF name_count > 0 THEN
+--        raise_application_error(-20001,'Name must be unique');
+--    END IF;
+--        
+--END;
+
+--insert into GROUPS (Name, C_Val)
+--values ('Tailer Derden', 1000);
+--
+--insert into GROUPS (Name, C_Val)
+--values ('Bob', 1500);
+--
+--insert into GROUPS (Name, C_Val)
+--values ('Tailer Derden', 17);
+
+
+
+
+

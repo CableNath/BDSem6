@@ -1,0 +1,15 @@
+--CREATE OR REPLACE TRIGGER CASCADE_DELETE
+--BEFORE DELETE ON GROUPS
+--FOR EACH ROW
+--BEGIN
+--    DELETE FROM STUDENTS WHERE group_id = :old.group_id;
+--END;
+
+--insert into students (Name, Group_ID)
+--values ('Stive', 14);
+--
+--select * from students;
+--
+--delete from groups where groups.group_id = 14;
+--
+--select * from students;

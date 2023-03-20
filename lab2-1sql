@@ -1,0 +1,13 @@
+
+create table GROUPS (
+    Group_ID number primary key,
+    Name varchar2(50),
+    C_Val number
+);
+
+create table STUDENTS (
+    Student_ID number primary key,
+    Name varchar2(50),
+    Group_ID number,
+    constraint fk_group foreign key (Group_ID) references GROUPS(Group_ID)
+)

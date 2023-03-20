@@ -1,0 +1,51 @@
+--create or replace procedure recovery (DateTimeStart in varchar2, DateTimeFinish in varchar2) 
+--is
+--    date_start DATE;
+--    date_finish DATE;
+--    TYPE string_array_t IS TABLE OF VARCHAR2(100);
+--    names_Log string_array_t;
+--    TYPE number_array_t IS TABLE OF NUMBER;
+--    groups_id_Log number_array_t;
+--begin
+--    date_start := TO_DATE(DateTimeStart,'DD-MON-YYYY HH24:MI:SS');
+--    date_finish := TO_DATE(DateTimeFinish,'DD-MON-YYYY HH24:MI:SS');
+--    
+--    while date_start <= date_finish loop
+--        select LogBook.Name bulk collect into names_Log from LogBook
+--            where LogBook.DateTime = date_start;
+--        select LogBook.Group_ID bulk collect into groups_id_Log from LogBook
+--            where LogBook.DateTime = date_start;
+--        
+--        FOR i IN 1..names_Log.COUNT
+--        loop
+--            insert into students 
+--            (Name, Group_ID)
+--            values
+--            (names_Log(i), groups_id_Log(i));
+--        end loop;
+--        
+--        date_start := date_start + 1/86400;
+--    end loop;
+--    
+--end;
+
+--select * from groups;;
+--
+--insert into students (Name, Group_ID)
+--values ('Jack', 16);
+--
+--insert into students (Name, Group_ID)
+--values ('Bob', 15);
+--
+--delete from students where students.name = 'Jack' or students.name = 'Bob';
+--
+--select * from LogBook;
+--
+--call recovery ('20-Март-2023 18:12:01', '20-Март-2023 18:12:01');
+--
+--select * from students;
+--
+--select * from LogBook;
+
+
+
