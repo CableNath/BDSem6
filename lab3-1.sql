@@ -1,130 +1,9 @@
-drop table dev_shema.customers CASCADE CONSTRAINTS;
-drop table dev_shema.orders CASCADE CONSTRAINTS;
-drop table prod_shema.customers CASCADE CONSTRAINTS;
-drop table prod_shema.orders CASCADE CONSTRAINTS;
 
-select * from all_tables;
-select * from all_users;
-
-
-
-CREATE TABLE customers
-(
-  id          NUMBER(10)   PRIMARY KEY,
-  first_name  VARCHAR2(50),
-  last_name   VARCHAR2(50),
-  email       VARCHAR2(50) UNIQUE,
-  created_at  DATE
-);
-
-CREATE TABLE dev_shema.customers
-(
-  id          NUMBER(10)   PRIMARY KEY,
-  first_name  VARCHAR2(50),
-  last_name   VARCHAR2(50),
-  email       VARCHAR2(50) UNIQUE,
-  created_at  DATE
-);
-
-CREATE TABLE dev_shema.orders
-(
-  id          NUMBER(10)   PRIMARY KEY,
-  customer_id NUMBER(10)   REFERENCES dev_shema.customers(id),
-  order_date  DATE,
-  amount      NUMBER(10,2)
-);
-
-CREATE TABLE prod_shema.customers
-(
-  id          NUMBER(10)   PRIMARY KEY,
-  first_name  VARCHAR2(50),
-  last_name   VARCHAR2(50),
-  email       VARCHAR2(50) UNIQUE,
-  created_at  DATE
-);
-
-CREATE TABLE prod_shema.orders
-(
-  id          NUMBER(10)   PRIMARY KEY,
-  customer_id NUMBER(10)   REFERENCES prod_shema.customers(id),
-  order_date  DATE,
-  amount      NUMBER(10,2)
-);
-
-select * from all_tables where OWNER = 'DEV_SHEMA';
-select * from all_tables where owner='PROD_SHEMA';
-select * from dev_shema.t10;
-
-
-select * from DEV_SHEMA.T6;
-create table prod_shema.t6 (
-    id NUMBER(10) PRIMARY KEY,
-    val varchar(10),
-    time DATE,
-    year number
-);
-
-select * from ALL_TAB_COLUMNS where OWNER = 'PROD_SHEMA' and TABLE_NAME = 'T1';
-alter table prod_shema.t6
-add time date;
-
-select * from PROD_SHEMA.T6;
-
-CREATE TABLE dev_shema.t10 (
-    id NUMBER(10) PRIMARY KEY,
-    go integer
-);
-
-
-alter table dev_shema.t12
-add constraint fk_t12_t13_new foreign key (t13_id) references dev_shema.t13(id);
-
-
-select * from ALL_CONSTRAINTS where owner = 'DEV_SHEMA';
-
-drop table dev_shema.t13;
-
-create table dev_shema.t13 (
-    id NUMBER(10) PRIMARY KEY,
-    name varchar2(50),
-    t12_id number,
-    constraint fk_t13_t12 FOREIGN KEY (t12_id) REFERENCES dev_shema.t12(id)
-);
-
-
-
-SELECT t.table_name, COUNT(*) AS fk_count
-        FROM all_tables t
-            LEFT JOIN all_constraints c ON t.table_name = c.table_name AND t.owner = c.owner AND c.constraint_type = 'R'
-            LEFT JOIN all_constraints rc ON c.r_owner = rc.owner AND c.r_constraint_name = rc.constraint_name
-        WHERE t.owner = 'DEV_SHEMA'
-            AND (c.owner = 'DEV_SHEMA' or c.owner is null)
-            AND t.table_name NOT IN (
-                select table_name
-                from ALL_TAB_COLUMNS d_c
-                where OWNER = 'DEV_SHEMA'
-                and compare_table(t.TABLE_NAME, 'DEV_SHEMA', 'PROD_SHEMA') = 1
---                 and column_name not in (
---                     select column_name from all_tab_columns h
---                     where h.owner = 'PROD_SHEMA'
---                     and h.table_name = t.table_name
---                 )
-            )
-        GROUP BY t.table_name
-        ORDER BY fk_count;
-
-SELECT t.table_name
-        FROM all_tables t
-        WHERE t.owner = 'PROD_SHEMA';
-
-select r_owner from all_constraints where owner='DEV_SHEMA';
-select * from all_tables where OWNER = 'PROD_SHEMA';
-select * from ALL_TAB_COLUMNS where table_name = 'T10';
-
-select table_name from all_tables where owner = 'PROD_SHEMA';
-
+select * from all_tables where owner = 'DEV_SCHEMA'
+union
+select * from all_tables where owner = 'PROD_SCHEMA';
 -- test lab3 - 1
-call compare_schemas('DEV_SHEMA', 'PROD_SHEMA');
+call compare_schemas('DEV_SCHEMA', 'PROD_SCHEMA');
 
 create or replace function compare_table (name_of_table varchar2, dev_schema_name varchar2, prod_schema_name varchar2)
 return number
@@ -142,8 +21,8 @@ is
           and t.table_name = name_of_table;
 
     column_count number;
-    dev_cl_count number;
-    prod_cl_count number;
+    dev_cl_count number := 0;
+    prod_cl_count number := 0;
 begin
     select count(*) into dev_cl_count
         from ALL_TAB_COLUMNS t
@@ -180,7 +59,6 @@ begin
                     return 0;
                 end if;
             end loop;
-
     end case;
 
     return 1;
@@ -203,8 +81,8 @@ CREATE OR REPLACE PROCEDURE compare_schemas (
             AND t.table_name NOT IN (
                 select table_name
                 from ALL_TAB_COLUMNS d_c
-                where OWNER = dev_schema_name
-                and compare_table(t.table_name, dev_schema_name, prod_schema_name) = 1
+                where OWNER = 'DEV_SCHEMA'
+                and compare_table(t.TABLE_NAME, dev_schema_name, prod_schema_name) = 1
             )
         GROUP BY t.table_name;
 
