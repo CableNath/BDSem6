@@ -45,7 +45,7 @@ create table prod_schema.t2_only_prod (
 );
 
 create table prod_schema.t3_dev_ref (
-    id number primary key ,
+    id number primary key,
     t4_id number,
     weight number
 );
