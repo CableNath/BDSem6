@@ -23,6 +23,16 @@ begin
     return 1;
 end;
 
+create or replace function prod_schema.buf_function(arg number) return number is
+begin
+    return 1;
+end;
+
+create or replace function dev_schema.buf_function(arg number) return number is
+begin
+    return 2;
+end;
+
 DECLARE
   l_sql VARCHAR2(1000);
 BEGIN

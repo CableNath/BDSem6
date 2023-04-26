@@ -180,7 +180,110 @@ BEGIN
     -- dbms_output.PUT_LINE(whole_text);
     EXECUTE IMMEDIATE whole_text;
 END;
+/
 
+CREATE OR REPLACE PROCEDURE REMOVE_PROD_OBJ(dev_schema_name VARCHAR2, prod_schema_name VARCHAR2) AS
+    CURSOR dev_schema_tables IS
+        SELECT TABLE_NAME FROM ALL_TABLES
+        WHERE OWNER = prod_schema_name
+        MINUS
+        SELECT TABLE_NAME FROM ALL_TABLES
+        WHERE OWNER = dev_schema_name;
+
+    CURSOR dev_schema_procedures IS
+        SELECT DISTINCT NAME FROM ALL_SOURCE
+        WHERE OWNER = prod_schema_name
+            AND TYPE = 'PROCEDURE'
+        MINUS
+        SELECT DISTINCT NAME FROM ALL_SOURCE
+        WHERE OWNER = dev_schema_name
+            AND TYPE = 'PROCEDURE';
+
+    CURSOR dev_schema_functions IS
+        SELECT DISTINCT NAME FROM ALL_SOURCE
+        WHERE OWNER = prod_schema_name
+            AND TYPE = 'FUNCTION'
+        MINUS
+        SELECT DISTINCT NAME FROM ALL_SOURCE
+        WHERE OWNER = dev_schema_name
+            AND TYPE = 'FUNCTION';
+
+    CURSOR dev_schema_packages IS
+        SELECT DISTINCT NAME FROM ALL_SOURCE
+        WHERE OWNER = prod_schema_name
+            AND TYPE = 'PACKAGE'
+        MINUS
+        SELECT DISTINCT NAME FROM ALL_SOURCE
+        WHERE OWNER = dev_schema_name
+            AND TYPE = 'PACKAGE';
+
+    CURSOR dev_schema_indexes IS
+        SELECT INDEX_NAME FROM ALL_INDEXES
+        WHERE OWNER = prod_schema_name
+            AND NOT REGEXP_LIKE (ALL_INDEXES.INDEX_NAME, '^SYS_|^BIN_')
+        MINUS
+        SELECT INDEX_NAME FROM ALL_INDEXES
+        WHERE OWNER = dev_schema_name
+            AND NOT REGEXP_LIKE (ALL_INDEXES.INDEX_NAME, '^SYS_|^BIN_');
+BEGIN
+    FOR dev_schema_table IN dev_schema_tables
+    LOOP
+        -- dbms_output.put_line('DROP TABLE ' || prod_schema_name || '.' || dev_schema_table.TABLE_NAME || ';');
+        EXECUTE IMMEDIATE 'DROP TABLE ' || prod_schema_name || '.' || dev_schema_table.TABLE_NAME;
+    END LOOP;
+    FOR dev_schema_procedure IN dev_schema_procedures
+    LOOP
+        -- dbms_output.put_line('DROP PROCEDURE ' || prod_schema_name || '.' || dev_schema_procedure.NAME || ';');
+        EXECUTE IMMEDIATE 'DROP PROCEDURE ' || prod_schema_name || '.' || dev_schema_procedure.NAME;
+    END LOOP;
+    FOR dev_schema_procedure IN dev_schema_functions
+    LOOP
+        -- dbms_output.put_line('DROP FUNCTION ' || prod_schema_name || '.' || dev_schema_procedure.NAME || ';');
+        EXECUTE IMMEDIATE 'DROP FUNCTION ' || prod_schema_name || '.' || dev_schema_procedure.NAME;
+    END LOOP;
+    FOR dev_schema_package IN dev_schema_packages
+    LOOP
+        -- dbms_output.put_line('DROP PACKAGE ' || prod_schema_name || '.' || dev_schema_package.NAME || ';');
+        EXECUTE IMMEDIATE 'DROP PACKAGE ' || prod_schema_name || '.' || dev_schema_package.NAME;
+    END LOOP;
+    FOR dev_schema_index IN dev_schema_indexes
+    LOOP
+        -- dbms_output.put_line('DROP INDEX ' || prod_schema_name || '.' || dev_schema_index.INDEX_NAME || ';');
+        EXECUTE IMMEDIATE 'DROP INDEX ' || prod_schema_name || '.' || dev_schema_index.INDEX_NAME;
+    END LOOP;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE CHECK_CYCLE(dev_schema_name VARCHAR2) AS
+    amount NUMBER;
+    CURSOR tab_all IS
+    SELECT DISTINCT ALL_CONS_COLUMNS.COLUMN_NAME, ALL_CONS_COLUMNS.CONSTRAINT_NAME,
+        ALL_CONSTRAINTS.CONSTRAINT_TYPE, ALL_IND_COLUMNS.TABLE_NAME tab1, ALL_CONSTRAINTS.TABLE_NAME tab2
+            FROM ALL_CONS_COLUMNS
+            JOIN ALL_CONSTRAINTS
+            ON ALL_CONSTRAINTS.TABLE_NAME = ALL_CONS_COLUMNS.TABLE_NAME
+            LEFT JOIN ALL_IND_COLUMNS
+            ON ALL_CONSTRAINTS.R_CONSTRAINT_NAME = ALL_IND_COLUMNS.INDEX_NAME
+            WHERE ALL_CONSTRAINTS.OWNER = dev_schema_name
+                AND NOT REGEXP_LIKE (ALL_CONS_COLUMNS.CONSTRAINT_NAME, '^SYS_|^BIN%')
+                AND ALL_CONSTRAINTS.CONSTRAINT_TYPE = 'R'
+                AND SUBSTR(ALL_CONS_COLUMNS.CONSTRAINT_NAME, 1, 1) = 'F';
+BEGIN
+    EXECUTE IMMEDIATE 'DELETE FROM cycle_check';
+    FOR tab IN tab_all
+    LOOP
+        EXECUTE IMMEDIATE 'INSERT INTO CYCLE_CHECK VALUES(''' || tab.tab1 || ''', ' || '1)';
+        EXECUTE IMMEDIATE 'INSERT INTO CYCLE_CHECK VALUES(''' || tab.tab2 || ''', ' || '-1)';
+        SELECT COUNT(*) INTO amount FROM
+            (SELECT name, sum(num) sum FROM cycle_check
+                GROUP BY name)
+            WHERE sum <> 0;
+        IF amount = 0 THEN
+            RAISE_APPLICATION_ERROR(-20343,'CYCLE IN TABLES');
+        END IF;
+    END LOOP;
+END;
+/
 
 CREATE TABLE cycle_check
 (
@@ -197,4 +300,6 @@ BEGIN
     COMP_INDEXES(dev_schema_name, prod_schema_name);
 END;
 
-call EXECUTE_SCRIPT('DEV_SCHEMA', 'PROD_SCHEMA')
+call EXECUTE_SCRIPT('DEV_SCHEMA', 'PROD_SCHEMA');
+
+call CHECK_CYCLE('DEV_SCHEMA')
