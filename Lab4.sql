@@ -535,7 +535,7 @@ CREATE OR REPLACE PACKAGE BODY json_parser AS
     IS
     BEGIN
         IF json_query_string.has('select') THEN
-            RETURN parse_select(json_query_string.get_object('select')) || ';';
+            RETURN parse_select(json_query_string.get_object('select'));
         ELSIF json_query_string.has('DML') THEN
             RETURN parse_dml_section(json_query_string.get_object('DML')) || ';';
         ELSIF json_query_string.has('DDL') THEN
@@ -569,8 +569,12 @@ BEGIN
 END read_from_file;
 
 
+declare
+    result varchar2(20000);
 BEGIN
-    DBMS_OUTPUT.PUT_LINE(json_parser.parse_JSON_to_SQL(JSON_OBJECT_T(read_from_file('READ_DIR', 'DDLFormatJSON.json'))));
+    result := json_parser.parse_JSON_to_SQL(JSON_OBJECT_T(read_from_file('READ_DIR', 'Task1_SELECT.json')));
+--     DBMS_OUTPUT.PUT_LINE(result);
+    EXECUTE IMMEDIATE result;
 END;
 
 alter session set "_ORACLE_SCRIPT"=true;
@@ -596,28 +600,34 @@ grant drop profile to lab4;
 
 ALTER SESSION SET PLSQL_V2_COMPATIBILITY = TRUE;
 
-CREATE TABLE tab_1
+CREATE TABLE tab1
 (
     id NUMBER PRIMARY KEY,
     name VARCHAR2(200),
     val_1 NUMBER
-); /
+);
 
-CREATE TABLE tab_2
+CREATE TABLE tab2
 (
     id NUMBER PRIMARY KEY,
     name VARCHAR2(200),
     val_2 NUMBER
 );
 
+insert into tab2 (id, name, val_2)
+values (1, 'SfQsd', 11);
 
-SELECT tab_1.id , tab_1.val_1 
-FROM tab_1 
-WHERE tab_1.id IN 
+insert into tab1 (id, name, val_1)
+values (1, 'aaaa', 132);
+
+
+SELECT tab1.id , tab1.val_1
+FROM tab1
+WHERE tab1.id IN
 (
-SELECT tab_2.id 
-FROM tab_2 
-WHERE (tab_2.name LIKE '%Q%' AND tab_2.val_2 > 10 AND tab_2.val_2 < 15)
+SELECT tab2.id
+FROM tab2
+WHERE (tab2.name LIKE '%Q%' AND tab2.val_2 > 10 AND tab2.val_2 < 15)
 );
 
 
