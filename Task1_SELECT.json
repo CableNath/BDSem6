@@ -1,0 +1,55 @@
+{
+    "select": {
+        "tables": [
+            {"tab_name": "tab_1",
+            "columns": [
+                {"col_name": "id", "alias": null},
+                {"col_name": "val_1", "alias": null}
+            ]}
+        ],
+        "from": [{"tab_name": "tab_1", "alias": null}],
+        "where": {
+                "comparison": {
+                    "tab_name": "tab_1",
+                    "col_name": "id",
+                    "comparator": "in",
+                    "value": {
+                        "select": {
+                            "tables": [
+                                {"tab_name": "tab_2",
+                                "columns": [
+                                    {"col_name": "id", "alias": null}
+                                ]}
+                            ],
+                                "from": [{"tab_name": "tab_2", "alias": null}],
+                                "where":{
+                                    "and": [
+                                        {"comparison": {
+                                            "tab_name": "tab_2",
+                                            "col_name": "name",
+                                            "comparator": "like",
+                                            "value": "%Q%"
+                                            }
+                                        },
+                                        {"comparison": {
+                                            "tab_name": "tab_2",
+                                            "col_name": "val_2",
+                                            "comparator": ">",
+                                            "value": 10
+                                            }
+                                        },
+                                        {"comparison": {
+                                            "tab_name": "tab_2",
+                                            "col_name": "val_2",
+                                            "comparator": "<",
+                                            "value": 15
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }  
+                }
+        }
+}

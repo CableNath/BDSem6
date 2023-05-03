@@ -1,0 +1,24 @@
+{
+    "DML": {
+        "type": "delete",
+        "tab_name": "tab1",
+        "where": {
+            "and": [
+                {"comparison": {
+                    "tab_name": "tqbbb",
+                    "col_name": "col_to_compare_in1",
+                    "comparator": ">",
+                    "value": 15
+                    }
+                },
+                {"comparison": {
+                    "tab_name": "dhst",
+                    "col_name": "col_to_compare_in2",
+                    "comparator": "<",
+                    "value": 15
+                    }
+                }
+            ]
+        }
+    }
+}
