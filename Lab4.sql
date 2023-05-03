@@ -32,6 +32,7 @@ CREATE OR REPLACE PACKAGE json_parser AS
 END json_parser;
 
 
+
 CREATE OR REPLACE PACKAGE BODY json_parser AS
     
 -----------------------
@@ -42,7 +43,7 @@ CREATE OR REPLACE PACKAGE BODY json_parser AS
     IS
         buff_json_object JSON_OBJECT_T;
         res_tab_name VARCHAR2(51) := NULL;
-        res_str VARCHAR2(300);
+        res_str VARCHAR2(10000);
     BEGIN
         IF table_name IS NOT NULL THEN
             res_tab_name := table_name || '.';
@@ -62,7 +63,7 @@ CREATE OR REPLACE PACKAGE BODY json_parser AS
     FUNCTION parse_table_section(json_query_string JSON_ARRAY_T)
                                                     RETURN VARCHAR2
     IS
-        res_str VARCHAR2(2000);
+        res_str VARCHAR2(10000);
         table_name VARCHAR2(50);
         buff_json_object JSON_OBJECT_T;
         json_names JSON_ARRAY_T;
@@ -87,7 +88,7 @@ CREATE OR REPLACE PACKAGE BODY json_parser AS
     
     FUNCTION parse_scalar_array(json_query_string JSON_ARRAY_T) RETURN VARCHAR2
     IS
-        res_str VARCHAR2(300) := '(';
+        res_str VARCHAR2(10000) := '(';
         buff_json_element JSON_ELEMENT_T;
     BEGIN
         FOR i IN 0..json_query_string.get_size - 1
@@ -107,7 +108,7 @@ CREATE OR REPLACE PACKAGE BODY json_parser AS
                                     is_in_join_segment BOOLEAN DEFAULT FALSE)
                                                         RETURN VARCHAR2
     IS
-        res_str VARCHAR2(500);
+        res_str VARCHAR2(10000);
         buff_json_element JSON_ELEMENT_T;
         buff_json_object JSON_OBJECT_T;
         res_tab_name VARCHAR2(51);
@@ -154,7 +155,7 @@ CREATE OR REPLACE PACKAGE BODY json_parser AS
                                         RETURN VARCHAR2
     IS
         buff_json_object JSON_OBJECT_T;
-        res_str VARCHAR2(1000) := '(';
+        res_str VARCHAR2(10000) := '(';
     BEGIN
         FOR i IN 0..json_query_string.get_size - 1
         LOOP
@@ -194,7 +195,7 @@ CREATE OR REPLACE PACKAGE BODY json_parser AS
     IS
         buff_json_object JSON_OBJECT_T;
         jo JSON_OBJECT_T;
-        res_str VARCHAR2(2000);
+        res_str VARCHAR2(10000);
     BEGIN
         FOR i IN 0..json_query_string.get_size - 1
         LOOP
@@ -264,7 +265,7 @@ CREATE OR REPLACE PACKAGE BODY json_parser AS
                                     json_values JSON_ARRAY_T,
                                     new_val_type NUMBER) RETURN VARCHAR2
     IS
-        res_str VARCHAR2(300);
+        res_str VARCHAR2(10000);
     BEGIN
         IF json_columns.get_size != json_values.get_size THEN
             RAISE_APPLICATION_ERROR(-20011, 'Mismatched values in "DML": columns(' 
@@ -405,7 +406,7 @@ CREATE OR REPLACE PACKAGE BODY json_parser AS
     FUNCTION parse_outline_constraints_section(json_constraints JSON_ARRAY_T) 
                                                 RETURN VARCHAR2
     IS
-        res_str VARCHAR2(500);
+        res_str VARCHAR2(10000);
         buff_str VARCHAR2(20);
         buff_json_object JSON_OBJECT_T;
     BEGIN
@@ -441,8 +442,8 @@ CREATE OR REPLACE PACKAGE BODY json_parser AS
     FUNCTION create_auto_increment_trigger(tab_name VARCHAR2, col_name VARCHAR2)
                                             RETURN VARCHAR2
     IS
-        seq_str VARCHAR2(100);
-        trigger_str VARCHAR2(300);
+        seq_str VARCHAR2(10000);
+        trigger_str VARCHAR2(10000);
     BEGIN
         seq_str := 'CREATE SEQUENCE ' || tab_name || '_' || col_name || '_seq START WITH 1;';
         trigger_str := 'CREATE OR REPLACE TRIGGER ' || tab_name || '_' || col_name || '_auto' 
@@ -460,9 +461,9 @@ CREATE OR REPLACE PACKAGE BODY json_parser AS
     IS
         buff_json_object JSON_OBJECT_T;
         buff_json_array JSON_ARRAY_T;
-        res_str VARCHAR2(500);
-        buff_str VARCHAR2(100);
-        trig_str VARCHAR2(300);
+        res_str VARCHAR2(10000);
+        buff_str VARCHAR2(10000);
+        trig_str VARCHAR2(10000);
     BEGIN
         FOR i IN 0..json_columns.get_size - 1
         LOOP
@@ -494,7 +495,7 @@ CREATE OR REPLACE PACKAGE BODY json_parser AS
 
     FUNCTION parse_ddl_section(json_query_string JSON_OBJECT_T) RETURN VARCHAR2
     IS
-        res_str VARCHAR2(1000);
+        res_str VARCHAR2(10000);
         buff_json_array JSON_ARRAY_T := NULL;
     BEGIN
         IF NOT json_query_string.has('type') THEN
@@ -569,11 +570,31 @@ END read_from_file;
 
 
 BEGIN
-    DBMS_OUTPUT.PUT_LINE(json_parser.parse_JSON_to_SQL(JSON_OBJECT_T(read_from_file('READ_DIR', 'DMLFormatJSON.json'))));
+    DBMS_OUTPUT.PUT_LINE(json_parser.parse_JSON_to_SQL(JSON_OBJECT_T(read_from_file('READ_DIR', 'DDLFormatJSON.json'))));
 END;
 
+alter session set "_ORACLE_SCRIPT"=true;
+create user lab4 identified by qweiop;
 
 
+grant create session to lab4;
+grant create table to lab4;
+grant create procedure to lab4;
+grant create trigger to lab4;
+grant create view to lab4;
+grant create sequence to lab4;
+grant alter any table to lab4;
+grant alter any procedure to lab4;
+grant alter any trigger to lab4;
+grant alter profile to lab4;
+grant delete any table to lab4;
+grant drop any table to lab4;
+grant drop any procedure to lab4;
+grant drop any trigger to lab4;
+grant drop any view to lab4;
+grant drop profile to lab4;
+
+ALTER SESSION SET PLSQL_V2_COMPATIBILITY = TRUE;
 
 CREATE TABLE tab_1
 (
