@@ -537,9 +537,9 @@ CREATE OR REPLACE PACKAGE BODY json_parser AS
         IF json_query_string.has('select') THEN
             RETURN parse_select(json_query_string.get_object('select'));
         ELSIF json_query_string.has('DML') THEN
-            RETURN parse_dml_section(json_query_string.get_object('DML')) || ';';
+            RETURN parse_dml_section(json_query_string.get_object('DML'));
         ELSIF json_query_string.has('DDL') THEN
-            RETURN parse_ddl_section(json_query_string.get_object('DDL')) || ';';
+            RETURN parse_ddl_section(json_query_string.get_object('DDL'));
         ELSE
             RAISE_APPLICATION_ERROR(-20000, 'Unsupported script type');
         END IF;
@@ -572,9 +572,9 @@ END read_from_file;
 declare
     result varchar2(20000);
 BEGIN
-    result := json_parser.parse_JSON_to_SQL(JSON_OBJECT_T(read_from_file('READ_DIR', 'Task1_SELECT.json')));
---     DBMS_OUTPUT.PUT_LINE(result);
-    EXECUTE IMMEDIATE result;
+    result := json_parser.parse_JSON_to_SQL(JSON_OBJECT_T(read_from_file('READ_DIR', 'Task3_DML.json')));
+    DBMS_OUTPUT.PUT_LINE(result);
+--     EXECUTE IMMEDIATE result;
 END;
 
 alter session set "_ORACLE_SCRIPT"=true;

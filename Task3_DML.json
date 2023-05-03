@@ -5,15 +5,15 @@
         "where": {
             "and": [
                 {"comparison": {
-                    "tab_name": "tqbbb",
-                    "col_name": "col_to_compare_in1",
+                    "tab_name": "tab1",
+                    "col_name": "val_1",
                     "comparator": ">",
-                    "value": 15
+                    "value": 10
                     }
                 },
                 {"comparison": {
-                    "tab_name": "dhst",
-                    "col_name": "col_to_compare_in2",
+                    "tab_name": "tab1",
+                    "col_name": "val_1",
                     "comparator": "<",
                     "value": 15
                     }
