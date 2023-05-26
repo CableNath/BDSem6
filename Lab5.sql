@@ -1,23 +1,31 @@
 alter session set "_ORACLE_SCRIPT"=true;
-create user lab5 identified by qweiop;
+create user lab5_schem identified by qweiop;
 
-GRANT ALL PRIVILEGES TO lab5;
-grant create session to lab5;
-grant create table to lab5;
-grant create procedure to lab5;
-grant create trigger to lab5;
-grant create view to lab5;
-grant create sequence to lab5;
-grant alter any table to lab5;
-grant alter any procedure to lab5;
-grant alter any trigger to lab5;
-grant alter profile to lab5;
-grant delete any table to lab5;
-grant drop any table to lab5;
-grant drop any procedure to lab5;
-grant drop any trigger to lab5;
-grant drop any view to lab5;
-grant drop profile to lab5;
+GRANT ALL PRIVILEGES TO lab5_schem;
+grant create any directory to lab5_schem;
+grant create session to lab5_schem;
+grant create table to lab5_schem;
+grant create procedure to lab5_schem;
+grant create trigger to lab5_schem;
+grant create view to lab5_schem;
+grant create sequence to lab5_schem;
+grant alter any table to lab5_schem;
+grant alter any procedure to lab5_schem;
+grant alter any trigger to lab5_schem;
+grant alter profile to lab5_schem;
+grant delete any table to lab5_schem;
+grant drop any directory to lab5_schema;
+grant drop any table to lab5_schem;
+grant drop any procedure to lab5_schem;
+grant drop any trigger to lab5_schem;
+grant drop any view to lab5_schem;
+grant drop profile to lab5_schem;
+
+
+grant select on sys.v_$session to dev_schema;
+grant select on sys.v_$sesstat to dev_schema;
+grant select on sys.v_$statname to dev_schema;
+grant SELECT ANY DICTIONARY to dev_schema;
 
 DROP TABLE product_order; /
 DROP TABLE Orders; /
@@ -63,7 +71,6 @@ CREATE TABLE product_order
     REFERENCES Orders(id)
 );
 
-select * from CUSTOMERS_LOGS;
 
 ------------------------
 --LOGS TABLES
@@ -405,8 +412,9 @@ BEGIN
         || CHR(10) || HTF.TABLEROWCLOSE || CHR(10);
     FOR ind IN types_arr.FIRST..types_arr.LAST
     LOOP
+        --display = 1 AND
         EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM ' || log_tab_name 
-            || ' WHERE display = 1 AND operation_type = ' || CHR(39) || types_arr(ind) || CHR(39) 
+            || ' WHERE display = 1 AND operation_type = ' || CHR(39) || types_arr(ind) || CHR(39)
             || from_str INTO i_num;
         res_str := res_str || HTF.TABLEROWOPEN
             || CHR(10) || HTF.TABLEDATA(types_arr(ind)) 
@@ -450,19 +458,101 @@ BEGIN
 END create_report;
 
 SELECT * FROM Customers;
+select * from products;
+select * from orders;
 
+
+---- drop
+drop table Customers_logs;
+drop table Products_logs;
+drop table Orders_logs;
+drop table product_order_logs;
+
+---- select
+select * from Customers_logs;
+select * from Products_logs;
+select * from Orders_logs;
+select * from product_order_logs;
+
+select * from Reports;
+
+----- update customer
 update customers
-set surname = 'Vin2'
+set surname = 'Vin3'
 where surname = 'Vin';
 
 update customers
-set surname = '5k mmr'
+set surname = '4k mmr'
 where name = 'Pudge';
+
+------ update products
+update products
+set price = '25'
+where name = 'dildo';
+
+update products
+set price = '155'
+where name = 'apple';
+
+------ update orders
+update ORDERS
+set customer_id = '2'
+where customer_id = '1';
+
+update orders
+set customer_id = '1'
+where customer_id = '3';
+
+
+
+
+----- delete product_order
+delete from product_order
+where id = 1;
+
+delete from product_order
+where id = 2;
+
+delete from product_order
+where id = 3;
+
+------ delete order
+delete from orders
+where id = 1;
+
+delete from orders
+where id = 2;
+
+delete from orders
+where id = 3;
+
+------- delete customer
+delete from customers
+where name = 'Mak';
+
+delete from Customers
+where name = 'Pudge';
+
+delete from Customers
+where name = 'chel';
+
+------ delete products
+delete from Products
+where name = 'dildo';
+
+delete from Products
+where name = 'apple';
+
+delete from Products
+where name = 'pen';
+
+
 
 
 INSERT INTO Customers (name, surname) VALUES ('Mak', 'Vin');
 INSERT INTO Customers (name, surname) VALUES ('Pudge','7k mmr');
 INSERT INTO Customers (name, surname) VALUES ('chel', 'krut');
+
 
 INSERT INTO Products (name, price) VALUES ('dildo', 15);
 INSERT INTO Products (name, price) VALUES ('apple', 100);
@@ -476,19 +566,15 @@ INSERT INTO product_order (product_id, order_id, quantity) VALUES (1, 1, DEFAULT
 INSERT INTO product_order (product_id, order_id, quantity) VALUES (2, 2, 2);
 INSERT INTO product_order (product_id, order_id, quantity) VALUES (3, 3, 4);
 
-select * from CUSTOMERS;
-select * from Customers_logs;
 
 BEGIN
-    create_report;
+   --create_report(TO_TIMESTAMP('2023-05-26 14:27:29.979000', 'YYYY-MM-DD HH24:MI:SS.FF6'));
+   create_report(SYSTIMESTAMP  - (INTERVAL '0.001' SECOND) * 120000);
 END;
 
 BEGIN
-    restoration.restore_data(TO_TIMESTAMP('2023-05-03 18:43:30.956000', 'YYYY-MM-DD HH24:MI:SS.FF'));
-    create_report;
+    restoration.restore_data(120000);
 END;
 
-SELECT TO_TIMESTAMP('03-05-23 09.13.22.600000000 PM', 'DD-MM-RR HH12.MI.SS.FF AM') FROM dual;
-select TO_TIMESTAMP('03-05-23 09.13.22.600000000 PM','DD-MON-RR HH12.MI.SS.FF AM') from dual;
-select TO_TIMESTAMP('03-MAY-23 09.13.22.600000000 PM','DD-MON-RR HH12.MI.SS.FF AM') from dual;
+
 --TO_TIMESTAMP('02-APR-23 07.23.12.098000000 PM','DD-MON-RR HH12.MI.SS.FF AM')
